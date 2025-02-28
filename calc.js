@@ -168,7 +168,7 @@ function div_with_rounding(_e, $, et) {
     return et && _e % $ != BigInt(0) ? tt + BigInt(1) : tt;
 }
 
-// 快速幂， 计算 n^p
+// 改造的快速幂
 function pow(n, p, isCeilRound) {
     let tt = MULTIPLIER;
     let nt = n * SUPPLY_MULTIPLIER;
