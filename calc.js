@@ -146,7 +146,7 @@ function find_root(currentTokenReserve, y, buySolAmount, curve) {
         let st = calculate_curve(ot, true, curve);
         nt > st ? (it = ot) : (rt = ot);
     }
-    console.log("二分查找求解根的次数: ", i);
+    // console.log("二分查找求解根的次数: ", i);
     return currentTokenReserve - it;
 }
 
@@ -352,7 +352,7 @@ function buyToken(amount, isBuyBySOL, currentTokenReserve) {
 
     if (isBuyBySOL) {
         // 按SOL买入
-        const _n = Number(hn) * LAMPORTS_PER_SOL$1,
+        const _n = Math.floor(Number(hn) * LAMPORTS_PER_SOL$1),
             { total: kn, buy_amount: Dn } = compute_buy_token_exact_in_with_fee(
                 _n,
                 currentTokenReserve
@@ -398,12 +398,29 @@ function buyToken(amount, isBuyBySOL, currentTokenReserve) {
     // console.log(pow(BigInt(2), BigInt(10), true));
     // console.log(buyToken("1", true, MAX_TOKEN_SUPPLY));
 
-    console.log(buyToken("3.642026972", true, MAX_TOKEN_SUPPLY));       //  50,000,000
-    console.log(buyToken("16.065526973", true, MAX_TOKEN_SUPPLY));      // 100,000,000
-    console.log(buyToken("83.261338321", true, MAX_TOKEN_SUPPLY));      // 200,000,000
-    console.log(buyToken("56239.830149844", true, MAX_TOKEN_SUPPLY));   // 800,000,000
-    console.log(buyToken("582423.209549844", true, MAX_TOKEN_SUPPLY));  // 900,000,000
-    console.log(buyToken("3288509.160749844", true, MAX_TOKEN_SUPPLY)); // 950,000,000
+    // console.log(buyToken("3.642026972", true, MAX_TOKEN_SUPPLY));       //  50,000,000
+    // console.log(buyToken("16.065526973", true, MAX_TOKEN_SUPPLY));      // 100,000,000
+    // console.log(buyToken("83.261338321", true, MAX_TOKEN_SUPPLY));      // 200,000,000
+    // console.log(buyToken("56239.830149844", true, MAX_TOKEN_SUPPLY));   // 800,000,000
+    // console.log(buyToken("582423.209549844", true, MAX_TOKEN_SUPPLY));  // 900,000,000
+    // console.log(buyToken("3288509.160749844", true, MAX_TOKEN_SUPPLY)); // 950,000,000
+
+    let i = 0.875;
+    while (i <= 500000) {
+        i += 10;
+        let ret = buyToken(i.toString(), true, MAX_TOKEN_SUPPLY);
+        console.log(`${i.toFixed(9).toString()},${ret.tokenAmount/1e9}`);
+    }
+
+    // while (i <= 582423) {
+    //     i += 10;
+    //     let ret = buyToken(i.toString(), true, MAX_TOKEN_SUPPLY);
+    //     console.log(`${i.toFixed(9).toString()},${ret.tokenAmount}`);
+    // }
+
+
+
+
     // console.log(buyToken("3927720.043250156", true, MAX_TOKEN_SUPPLY)); // 999,999,999
 
     // console.log(
