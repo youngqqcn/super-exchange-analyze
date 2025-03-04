@@ -2,7 +2,7 @@
 
 ## IDL 文件
 
--   IDL 文件: [super_exhcange_IDL_prod.json](./super_exhcange_IDL_prod.json)
+-   IDL 文件: [super_exhcange_IDL_prod.json](./super_exchange_IDL_prod.json)
 
 ## 关于 SUPER 的购买机制
 
