@@ -262,6 +262,8 @@ async (s) => {
 
 ## 计算买入Token数量(非SUPER)
 
+- 全部源码: [calc.js](./calc.js)
+
 ```js
 if (Ut.isNative) {
     // 按sol买入
@@ -295,137 +297,7 @@ if (Ut.isNative) {
     Nt(jn.toString()), St(Bn.toString()), kt(hn);
 }
 
-function compute_swap_with_fee(_e, $, et) {
-    let tt = compute_swap(BigInt(_e), BigInt($), et),
-        nt;
-    et ? (nt = BigInt($) - BigInt(_e)) : (nt = BigInt($) + BigInt(_e));
-    let rt = compute_fee(tt, nt),
-        it;
-    return (
-        et ? (it = tt + rt) : (it = tt - rt),
-        {
-            y: tt,
-            fee: rt,
-            total: it,
-        }
-    );
-}
-
-function compute_swap(_e, $, et) {
-    let tt;
-    if (et) {
-        if (((tt = $ - _e), tt == BigInt(0)))
-            throw new Error("Cannot buy all remaining supply");
-    } else if (((tt = $ + _e), tt > MAX_TOKEN_SUPPLY))
-        throw new Error("Cannot sell more than max token supply");
-    let nt = BigInt(0);
-    if (et) {
-        let rt = BigInt(0),
-            it = !0,
-            ot = BigInt(0);
-        for (let st of CURVES)
-            if ($ > st.token_supply_at_boundary)
-                if (
-                    (it && ((it = !1), (rt = calculate_curve($, !1, st))),
-                    tt >= st.token_supply_at_boundary)
-                ) {
-                    ot = calculate_curve(tt, !0, st);
-                    break;
-                } else $ = st.token_supply_at_boundary;
-        nt = ot - rt;
-    } else {
-        let rt = BigInt(0),
-            it = BigInt(0);
-        for (let ot = CURVES.length - 1; ot >= 0; ot--) {
-            let st = CURVES[ot],
-                lt;
-            if (
-                (ot == 0
-                    ? (lt = MAX_TOKEN_SUPPLY)
-                    : (lt = CURVES[ot - 1].token_supply_at_boundary),
-                $ < lt)
-            )
-                if (
-                    (rt == BigInt(0) && (rt = calculate_curve($, !1, st)),
-                    tt <= lt)
-                ) {
-                    it = calculate_curve(tt, !0, st);
-                    break;
-                } else $ = lt;
-        }
-        rt > it && (nt = rt - it);
-    }
-    return nt;
-}
-
-function compute_buy_token_exact_in_with_fee(_e, $) {
-    let et = compute_buy_token_exact_in(BigInt(_e), BigInt($)),
-        tt = BigInt($) - et,
-        nt = compute_fee(_e, tt);
-    return {
-        buy_amount: et,
-        y: BigInt(_e),
-        fee: nt,
-        total: BigInt(_e) + nt,
-    };
-}
-
-/**
- * _e: SOL数量
- * $: 当前供应量
- */
-function compute_buy_token_exact_in(_e, $) {
-    let et = BigInt(0),
-        tt = !0,
-        nt = BigInt(0);
-    for (let rt of CURVES)
-        if ($ > rt.token_supply_at_boundary) {
-            tt && ((tt = !1), (et = calculate_curve($, !1, rt)));
-            let it = rt.native_amount_at_boundary - et;
-            if (
-                _e < it ||
-                rt.k_with_multiplier_sol ==
-                    CURVE_LAST_PARAMS.k_with_multiplier_sol
-            ) {
-                nt += find_root($, et, _e, rt);
-                break;
-            } else if (_e == it) {
-                nt += $ - rt.token_supply_at_boundary;
-                break;
-            } else
-                (nt += $ - rt.token_supply_at_boundary),
-                    ($ = rt.token_supply_at_boundary),
-                    (_e -= it),
-                    (et = rt.native_amount_at_boundary);
-        }
-    return nt;
-}
-
-function find_root(_e, $, et, tt) {
-    let nt = $ + et;
-    if (tt.k_with_multiplier_sol == CURVE_LAST_PARAMS.k_with_multiplier_sol) {
-        let ot =
-                MAX_TOKEN_SUPPLY *
-                (CURVE_LAST_PARAMS.k_with_multiplier_sol / MULTIPLIER),
-            st = nt + CURVE_LAST_PARAMS.c_with_sol,
-            lt = ceil_div(ot, st);
-        if (lt >= _e) throw new Error("Buy amount too large");
-        return _e - lt;
-    }
-    let rt = tt.token_supply_at_boundary,
-        it = _e;
-    for (; it - rt > FIND_ROOT_MAX_ERROR; ) {
-        let ot = (rt + it) >> BigInt(1),
-            st = calculate_curve(ot, !0, tt);
-        nt > st ? (it = ot) : (rt = ot);
-    }
-    return _e - it;
-}
-
-function calculate_curve(_e, $, et) {
-    let tt = pow(_e, BigInt(et.n), $);
-    return div_with_rounding(et.k_with_multiplier_sol, tt, $) - et.c_with_sol;
-}
+//
 ```
 
 ## 计算SUPER和积分
