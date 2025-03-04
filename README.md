@@ -3,7 +3,6 @@
 ## IDL 文件
 
 -   IDL 文件: [super_exhcange_IDL_prod.json](./super_exhcange_IDL_prod.json)
-    -   https://solscan.io/account/quakeq7M2xRtm5sWahu5tqAW6SiX6Pu56fAVw5fKEHw?cluster=devnet
 
 ## 关于 SUPER 的购买机制
 
@@ -36,6 +35,7 @@ sequenceDiagram
 
 ![](./imgs/super-account.jpg)
 
+
 ## 定价曲线
 
 庄家控筹率
@@ -49,8 +49,9 @@ sequenceDiagram
 | 582423.2  | 90%    |
 | 3288509.1 | 95%    |
 
--   7 条曲线
-    -   index-BFZ26sEw:82256
+![](./imgs/curves.jpg)
+
+## 7条曲线
 
 ```js
 
