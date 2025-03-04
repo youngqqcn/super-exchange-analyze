@@ -1,15 +1,11 @@
 # Super.exchange 分析
 
+## IDL 文件
 
-## IDL文件
+-   IDL 文件: [super_exhcange_IDL_prod.json](./super_exchange_IDL.json)
+    -   https://solscan.io/account/quakeq7M2xRtm5sWahu5tqAW6SiX6Pu56fAVw5fKEHw?cluster=devnet
 
-
-- IDL文件: [super_exhcange_IDL_prod.json](./super_exchange_IDL.json)
-  - https://solscan.io/account/quakeq7M2xRtm5sWahu5tqAW6SiX6Pu56fAVw5fKEHw?cluster=devnet
-
-
-
-## 关于 SUPER的购买机制
+## 关于 SUPER 的购买机制
 
 ```mermaid
 sequenceDiagram
@@ -40,26 +36,21 @@ sequenceDiagram
 
 ![](./imgs/super-account.jpg)
 
-
-
-
 ## 定价曲线
 
 庄家控筹率
 
-|所需SOL|控筹率 |
-|----|----|
-| 3.6| 5%|
-|16.0 | 10%|
-|83.2| 20% |
-|56239.8| 80% |
-|582423.2| 90% |
-|3288509.1| 95% |
+| 所需 SOL  | 控筹率 |
+| --------- | ------ |
+| 3.6       | 5%     |
+| 16.0      | 10%    |
+| 83.2      | 20%    |
+| 56239.8   | 80%    |
+| 582423.2  | 90%    |
+| 3288509.1 | 95%    |
 
-
-
-- 7条曲线
-  - index-BFZ26sEw:82256
+-   7 条曲线
+    -   index-BFZ26sEw:82256
 
 ```js
 
@@ -124,102 +115,258 @@ const U64_MAX = (BigInt(1) << BigInt(64)) - BigInt(1)
 
 ```
 
+## 购买 SUPER 或其他 Token
 
-
-计算买入token数量
+用户要持有积分才能购买SUPER
 
 ```js
+async (s) => {
+    const [d] = U.findProgramAddressSync(
+            [A.from("market"), A.from(s.tokenSymbol), r.toBuffer()],
+            i.programId
+        ),
+        n = await i.account.market.fetch(d),
+        { feeRecipient: f } = await i.account.config.fetch(r),
+        x = W(n.tokenMint, e.publicKey, !0);
+    let b = "";
 
+    if (s.tokenSymbol === _t) {
+        // 购买 SUPER,  需要用户持有积分才能购买 SUPER
+
+        let h = !0, // SUPER的Token ATA账户是否存在
+            w = !0; // superAccount的PDA账户是否存在
+
+        // 计算账户的 superAccount ， 用来存储 nonce 和buyAmount ，
+        // nonce: 从0开始递增，防止交易重放
+        // buyAmount: 已购买的SUPER数量，与中心化数据库做校验,防止多买
+        const [T] = U.findProgramAddressSync(
+            [A.from("super_account"), e.publicKey.toBuffer(), r.toBuffer()],
+            i.programId
+        );
+        try {
+            // 检查 superAccount的PDA账户是否已经存在
+            await i.account.superAccount.fetch(T);
+        } catch {
+            w = !1; // 不存在
+        }
+        const R = new U(s.tokenAddress),
+            { feeRecipient: v } = await i.account.config.fetch(r),
+            E = W(R, e.publicKey, !0);
+        (await t.getAccountInfo(E)) || (h = !1);
+
+        // 接口请求参数
+        const yt = {
+                account_exists: w,
+                ata_account_exists: h,
+                super_amount: s.buyAmount.toString(),
+                max_pay: s.maxPay.toString(),
+                fee_recipient: v.toBase58(),
+            },
+            // 请求后端接口, 构造交易
+            $ = await p({
+                requestBody: yt,
+            });
+
+        if ($)
+            if ($ && $.code === Kt.Success) {
+                // base58解码交易
+                const tt = Vt.decode($.data.transaction),
+                    Ct = Lt.from(tt),
+                    ft = await t.getLatestBlockhash();
+                (b = await e.sendTransaction(Ct, t)),
+                    await t.confirmTransaction(
+                        {
+                            signature: b,
+                            ...ft,
+                        },
+                        "confirmed"
+                    );
+            } else throw new Error($ == null ? void 0 : $.msg);
+        else throw new Error("Failed to buy SUPER");
+    } else {
+        // 购买非SUPER的token, 不需要检查积分, 直接前端构造交易即可
+
+        let h = [];
+        (await t.getAccountInfo(x)) ||
+            h.push(Et(e.publicKey, x, e.publicKey, n.tokenMint));
+        const [T] = U.findProgramAddressSync(
+                [
+                    A.from("market_community_vault"),
+                    A.from(s.tokenSymbol),
+                    r.toBuffer(),
+                ],
+                i.programId
+            ),
+            R = s.isNative
+                ? await i.methods
+                      .buyTokenExactIn({
+                          payAmount: new z(s.maxPay.toString()),
+                          minReceive: new z(s.buyAmount.toString()),
+                          donateRate: 0,
+                      })
+                      .accountsPartial({
+                          config: r,
+                          market: d,
+                          feeRecipient: f,
+                          tokenVault: n.tokenVault,
+                          tokenRecipient: x,
+                          nativeVault: n.nativeVault,
+                          communityVault: T,
+                      })
+                      .instruction()
+                : await i.methods
+                      .buyToken({
+                          buyAmount: new z(s.buyAmount.toString()),
+                          maxPay: new z(s.maxPay.toString()),
+                          donateRate: 0,
+                      })
+                      .accountsPartial({
+                          config: r,
+                          market: d,
+                          feeRecipient: f,
+                          tokenVault: n.tokenVault,
+                          tokenRecipient: x,
+                          nativeVault: n.nativeVault,
+                          communityVault: T,
+                      })
+                      .instruction();
+        h.push(R);
+        const v = await u(h),
+            E = G.setComputeUnitLimit({
+                units: v.simulateResult.value.unitsConsumed * it,
+            });
+        h.unshift(E);
+        const Y = new Q(
+            new X({
+                instructions: h,
+                recentBlockhash: v.latestBlockhash.blockhash,
+                payerKey: e.publicKey,
+            }).compileToV0Message()
+        );
+        (b = await e.sendTransaction(Y, t)),
+            await t.confirmTransaction(
+                {
+                    signature: b,
+                    ...v.latestBlockhash,
+                },
+                "confirmed"
+            );
+    }
+    return {
+        signature: b,
+        tokenMint: n.tokenMint,
+    };
+};
+```
+
+## 计算买入Token数量(非SUPER)
+
+```js
 if (Ut.isNative) {
     // 按sol买入
     // hn: SOL数量
-    const _n = Number(hn) * LAMPORTS_PER_SOL$1
+    const _n = Number(hn) * LAMPORTS_PER_SOL$1,
         // kn: 加上手续费的总SOL
         // Dn: 买入的token数量
         // remaining_token_supply: 当前供应量
-        , {total: kn, buy_amount: Dn} = compute_buy_token_exact_in_with_fee(_n, remaining_token_supply)
-
-        , jn = div(Number(Dn), DEFAULT_TOKEN_DECIMALS_NUMBER)
-        , Bn = translation(div(Number(kn), LAMPORTS_PER_SOL$1), DEFAULT_NATIVE_DECIMALS);
-    Nt(Bn.toString()),
-    St(hn),
-    kt(jn.toString())
+        { total: kn, buy_amount: Dn } = compute_buy_token_exact_in_with_fee(
+            _n,
+            remaining_token_supply
+        ),
+        jn = div(Number(Dn), DEFAULT_TOKEN_DECIMALS_NUMBER),
+        Bn = translation(
+            div(Number(kn), LAMPORTS_PER_SOL$1),
+            DEFAULT_NATIVE_DECIMALS
+        );
+    Nt(Bn.toString()), St(hn), kt(jn.toString());
 } else {
     // 按照token数量买入
-    const _n = Number(hn) * DEFAULT_TOKEN_DECIMALS_NUMBER
-        , {y: kn, total: Dn} = compute_swap_with_fee(_n, MAX_TOKEN_SUPPLY, !0)
-        , jn = translation(div(Number(Dn), LAMPORTS_PER_SOL$1), DEFAULT_NATIVE_DECIMALS)
-        , Bn = translation(div(Number(kn), LAMPORTS_PER_SOL$1), DEFAULT_NATIVE_DECIMALS);
-    Nt(jn.toString()),
-    St(Bn.toString()),
-    kt(hn)
+    const _n = Number(hn) * DEFAULT_TOKEN_DECIMALS_NUMBER,
+        { y: kn, total: Dn } = compute_swap_with_fee(_n, MAX_TOKEN_SUPPLY, !0),
+        jn = translation(
+            div(Number(Dn), LAMPORTS_PER_SOL$1),
+            DEFAULT_NATIVE_DECIMALS
+        ),
+        Bn = translation(
+            div(Number(kn), LAMPORTS_PER_SOL$1),
+            DEFAULT_NATIVE_DECIMALS
+        );
+    Nt(jn.toString()), St(Bn.toString()), kt(hn);
 }
 
 function compute_swap_with_fee(_e, $, et) {
-    let tt = compute_swap(BigInt(_e), BigInt($), et), nt;
-    et ? nt = BigInt($) - BigInt(_e) : nt = BigInt($) + BigInt(_e);
-    let rt = compute_fee(tt, nt), it;
-    return et ? it = tt + rt : it = tt - rt,
-    {
-        y: tt,
-        fee: rt,
-        total: it
-    }
+    let tt = compute_swap(BigInt(_e), BigInt($), et),
+        nt;
+    et ? (nt = BigInt($) - BigInt(_e)) : (nt = BigInt($) + BigInt(_e));
+    let rt = compute_fee(tt, nt),
+        it;
+    return (
+        et ? (it = tt + rt) : (it = tt - rt),
+        {
+            y: tt,
+            fee: rt,
+            total: it,
+        }
+    );
 }
 
 function compute_swap(_e, $, et) {
     let tt;
     if (et) {
-        if (tt = $ - _e,
-        tt == BigInt(0))
-            throw new Error("Cannot buy all remaining supply")
-    } else if (tt = $ + _e,
-    tt > MAX_TOKEN_SUPPLY)
+        if (((tt = $ - _e), tt == BigInt(0)))
+            throw new Error("Cannot buy all remaining supply");
+    } else if (((tt = $ + _e), tt > MAX_TOKEN_SUPPLY))
         throw new Error("Cannot sell more than max token supply");
     let nt = BigInt(0);
     if (et) {
-        let rt = BigInt(0)
-          , it = !0
-          , ot = BigInt(0);
+        let rt = BigInt(0),
+            it = !0,
+            ot = BigInt(0);
         for (let st of CURVES)
             if ($ > st.token_supply_at_boundary)
-                if (it && (it = !1,
-                rt = calculate_curve($, !1, st)),
-                tt >= st.token_supply_at_boundary) {
+                if (
+                    (it && ((it = !1), (rt = calculate_curve($, !1, st))),
+                    tt >= st.token_supply_at_boundary)
+                ) {
                     ot = calculate_curve(tt, !0, st);
-                    break
-                } else
-                    $ = st.token_supply_at_boundary;
-        nt = ot - rt
+                    break;
+                } else $ = st.token_supply_at_boundary;
+        nt = ot - rt;
     } else {
-        let rt = BigInt(0)
-          , it = BigInt(0);
+        let rt = BigInt(0),
+            it = BigInt(0);
         for (let ot = CURVES.length - 1; ot >= 0; ot--) {
-            let st = CURVES[ot], lt;
-            if (ot == 0 ? lt = MAX_TOKEN_SUPPLY : lt = CURVES[ot - 1].token_supply_at_boundary,
-            $ < lt)
-                if (rt == BigInt(0) && (rt = calculate_curve($, !1, st)),
-                tt <= lt) {
+            let st = CURVES[ot],
+                lt;
+            if (
+                (ot == 0
+                    ? (lt = MAX_TOKEN_SUPPLY)
+                    : (lt = CURVES[ot - 1].token_supply_at_boundary),
+                $ < lt)
+            )
+                if (
+                    (rt == BigInt(0) && (rt = calculate_curve($, !1, st)),
+                    tt <= lt)
+                ) {
                     it = calculate_curve(tt, !0, st);
-                    break
-                } else
-                    $ = lt
+                    break;
+                } else $ = lt;
         }
-        rt > it && (nt = rt - it)
+        rt > it && (nt = rt - it);
     }
-    return nt
+    return nt;
 }
 
 function compute_buy_token_exact_in_with_fee(_e, $) {
-    let et = compute_buy_token_exact_in(BigInt(_e), BigInt($))
-      , tt = BigInt($) - et
-      , nt = compute_fee(_e, tt);
+    let et = compute_buy_token_exact_in(BigInt(_e), BigInt($)),
+        tt = BigInt($) - et,
+        nt = compute_fee(_e, tt);
     return {
         buy_amount: et,
         y: BigInt(_e),
         fee: nt,
-        total: BigInt(_e) + nt
-    }
+        total: BigInt(_e) + nt,
+    };
 }
 
 /**
@@ -227,60 +374,62 @@ function compute_buy_token_exact_in_with_fee(_e, $) {
  * $: 当前供应量
  */
 function compute_buy_token_exact_in(_e, $) {
-
-
-    let et = BigInt(0)
-      , tt = !0
-      , nt = BigInt(0);
+    let et = BigInt(0),
+        tt = !0,
+        nt = BigInt(0);
     for (let rt of CURVES)
         if ($ > rt.token_supply_at_boundary) {
-            tt && (tt = !1, et = calculate_curve($, !1, rt));
+            tt && ((tt = !1), (et = calculate_curve($, !1, rt)));
             let it = rt.native_amount_at_boundary - et;
-            if (_e < it || rt.k_with_multiplier_sol == CURVE_LAST_PARAMS.k_with_multiplier_sol) {
+            if (
+                _e < it ||
+                rt.k_with_multiplier_sol ==
+                    CURVE_LAST_PARAMS.k_with_multiplier_sol
+            ) {
                 nt += find_root($, et, _e, rt);
-                break
+                break;
             } else if (_e == it) {
                 nt += $ - rt.token_supply_at_boundary;
-                break
+                break;
             } else
-                nt += $ - rt.token_supply_at_boundary,
-                $ = rt.token_supply_at_boundary,
-                _e -= it,
-                et = rt.native_amount_at_boundary
+                (nt += $ - rt.token_supply_at_boundary),
+                    ($ = rt.token_supply_at_boundary),
+                    (_e -= it),
+                    (et = rt.native_amount_at_boundary);
         }
-    return nt
+    return nt;
 }
 
 function find_root(_e, $, et, tt) {
     let nt = $ + et;
     if (tt.k_with_multiplier_sol == CURVE_LAST_PARAMS.k_with_multiplier_sol) {
-        let ot = MAX_TOKEN_SUPPLY * (CURVE_LAST_PARAMS.k_with_multiplier_sol / MULTIPLIER)
-          , st = nt + CURVE_LAST_PARAMS.c_with_sol
-          , lt = ceil_div(ot, st);
-        if (lt >= _e)
-            throw new Error("Buy amount too large");
-        return _e - lt
+        let ot =
+                MAX_TOKEN_SUPPLY *
+                (CURVE_LAST_PARAMS.k_with_multiplier_sol / MULTIPLIER),
+            st = nt + CURVE_LAST_PARAMS.c_with_sol,
+            lt = ceil_div(ot, st);
+        if (lt >= _e) throw new Error("Buy amount too large");
+        return _e - lt;
     }
-    let rt = tt.token_supply_at_boundary
-      , it = _e;
+    let rt = tt.token_supply_at_boundary,
+        it = _e;
     for (; it - rt > FIND_ROOT_MAX_ERROR; ) {
-        let ot = rt + it >> BigInt(1)
-          , st = calculate_curve(ot, !0, tt);
-        nt > st ? it = ot : rt = ot
+        let ot = (rt + it) >> BigInt(1),
+            st = calculate_curve(ot, !0, tt);
+        nt > st ? (it = ot) : (rt = ot);
     }
-    return _e - it
+    return _e - it;
 }
 
 function calculate_curve(_e, $, et) {
     let tt = pow(_e, BigInt(et.n), $);
-    return div_with_rounding(et.k_with_multiplier_sol, tt, $) - et.c_with_sol
+    return div_with_rounding(et.k_with_multiplier_sol, tt, $) - et.c_with_sol;
 }
 ```
 
+## 计算积分
 
-- 积分
-
-```js
+````js
 function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
     if (et < 100)
         throw new Error("Invalid max threshold");
@@ -318,4 +467,4 @@ function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
     }
     return nt
 }
-```# super-exchange-analyze
+```

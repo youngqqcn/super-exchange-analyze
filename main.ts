@@ -200,15 +200,12 @@ const FeeDistributor = "feeDQ2GHpsLz67tNSXjfYfCmW7bXKcL4PEU7WAgFaN9";
 
         if (true) {
             // 计算账号的 superAccount
-            const arr = [
-                115, 117, 112, 101, 114, 95, 97, 99, 99, 111, 117, 110, 116,
-            ];
             const fromAccount = new PublicKey(
                 "B26boKDLpJ7VV1gggCB4WMp2ZtNe19MQqB3m668MnMZj"
             );
             const [superAccount] = PublicKey.findProgramAddressSync(
                 [
-                    Uint8Array.from(arr),
+                    Buffer.from("super_account"),
                     fromAccount.toBuffer(),
                     confgiAccount.toBuffer(),
                 ],
