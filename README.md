@@ -36,9 +36,9 @@ sequenceDiagram
     合约->>合约: 执行交易
     合约-->>-前端: 交易成功
     前端-->>-用户: SUPER购买成功
-
-
 ```
+
+![](./imgs/super-account.jpg)
 
 
 
