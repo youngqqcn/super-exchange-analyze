@@ -198,8 +198,8 @@ const FeeDistributor = "feeDQ2GHpsLz67tNSXjfYfCmW7bXKcL4PEU7WAgFaN9";
         // );
         // console.log("configAcc: ", configAcc);
 
+        // 计算账号的 superAccount
         if (true) {
-            // 计算账号的 superAccount
             const fromAccount = new PublicKey(
                 "B26boKDLpJ7VV1gggCB4WMp2ZtNe19MQqB3m668MnMZj"
             );
@@ -227,6 +227,8 @@ const FeeDistributor = "feeDQ2GHpsLz67tNSXjfYfCmW7bXKcL4PEU7WAgFaN9";
         }
 
         return;
+
+        // 下面是购买交易
 
         const superTokenAddress = "suprkbfvwpFZXzWaoKjTzGkW1nkvvwK9n2E6g1zyLFo";
         const mint = new PublicKey(superTokenAddress); // SUPER 的地址
