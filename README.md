@@ -2,7 +2,7 @@
 
 ## IDL 文件
 
--   IDL 文件: [super_exhcange_IDL_prod.json](./super_exchange_IDL.json)
+-   IDL 文件: [super_exhcange_IDL_prod.json](./super_exhcange_IDL_prod.json)
     -   https://solscan.io/account/quakeq7M2xRtm5sWahu5tqAW6SiX6Pu56fAVw5fKEHw?cluster=devnet
 
 ## 关于 SUPER 的购买机制
@@ -427,9 +427,9 @@ function calculate_curve(_e, $, et) {
 }
 ```
 
-## 计算积分
+## 计算SUPER和积分
 
-````js
+```js
 function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
     if (et < 100)
         throw new Error("Invalid max threshold");
@@ -468,3 +468,19 @@ function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
     return nt
 }
 ```
+
+
+
+## 积分分配的算法
+
+> https://docs.super.exchange/supernomics/superchanics
+
+- 1积分可以购买 1 SUPER
+- 每5分钟分配一次
+  - 80% 给交易者
+  - 20% 给邀请者
+
+- 公式:
+![](./imgs/super-points-fomular.png)
+
+

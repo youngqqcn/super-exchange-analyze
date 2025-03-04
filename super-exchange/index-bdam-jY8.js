@@ -82465,6 +82465,8 @@ function compute_fee(_e, $) {
     return BigInt($) >= CURVE_3_PARAMS.token_supply_at_boundary ? et = BigInt(100) : BigInt($) >= CURVE_4_PARAMS.token_supply_at_boundary ? et = BigInt(50) : et = BigInt(10),
     BigInt(_e) * et / BigInt(1e4)
 }
+
+
 function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
     if (et < 100)
         throw new Error("Invalid max threshold");
