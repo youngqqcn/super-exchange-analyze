@@ -1,6 +1,51 @@
+# Super.exchange 分析
+
+
+## IDL文件
+
+
+- IDL文件: [super_exhcange_IDL_prod.json](./super_exchange_IDL.json)
+  - https://solscan.io/account/quakeq7M2xRtm5sWahu5tqAW6SiX6Pu56fAVw5fKEHw?cluster=devnet
+
+
+
+## 关于 SUPER的购买机制
+
+```mermaid
+sequenceDiagram
+    actor 用户
+    participant 前端
+    participant 后端
+    participant 合约
+    用户->>+前端: 购买SUPER
+    前端->>+后端: 获取可用积分
+    后端-->>-前端: 可用积分余额
+    前端->>+后端: x构造交易
+    后端->>合约: 获取SuperAccount信息
+    合约-->>后端: 返回nonce和buyAmount
+    后端->>后端: 构造交易
+    后端->>后端: 使用授权账户签名交易
+
+    后端-->>-前端: 构造后的交易(已部分签名)
+    前端-->>+用户: 钱包授权签名
+    用户->>-前端: 签名后的交易
+    前端->>+合约: 发送交易
+    合约->>合约: 校验授权账户签名
+    合约->>合约: 校验nonce和和buyAmount
+    合约->>合约: 更新nonce和和buyAmount
+    合约->>合约: 执行交易
+    合约-->>-前端: 交易成功
+    前端-->>-用户: SUPER购买成功
+
+
+```
+
+
+
+
+## 定价曲线
+
 庄家控筹率
-
-
 
 |所需SOL|控筹率 |
 |----|----|
