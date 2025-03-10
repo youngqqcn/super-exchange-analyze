@@ -35,34 +35,35 @@ sequenceDiagram
 
 ![](./imgs/super-account.jpg)
 
-
 ## 定价曲线
 
 庄家控筹率
 
-| 所需 SOL  | 控筹率 |
-| --------- | ------ |
-| 3.6       | 5%     |
-| 16.0      | 10%    |
-| 83.2      | 20%    |
-|149|25%|
-|239|30%|
-|369|35%|
-|559|40%|
-|849|45%|
-|1307|50%|
-|2063|55%|
-|3387|60%|
-|5874|65%|
-|11000|70%|
-|22955|75%|
-|56240|80%|
-| 582423  | 90%    |
-| 3288509 | 95%    |
+| 所需 SOL | 控筹率 |
+| -------- | ------ |
+| 4        | 5%     |
+| 16       | 10%    |
+| 41       | 15%    |
+| 83       | 20%    |
+| 149      | 25%    |
+| 239      | 30%    |
+| 369      | 35%    |
+| 559      | 40%    |
+| 849      | 45%    |
+| 1307     | 50%    |
+| 2063     | 55%    |
+| 3387     | 60%    |
+| 5874     | 65%    |
+| 11000    | 70%    |
+| 22955    | 75%    |
+| 56240    | 80%    |
+| 159250   | 85%    |
+| 582423   | 90%    |
+| 3288509  | 95%    |
 
 ![](./imgs/curves.jpg)
 
-## 7条曲线
+## 7 条曲线
 
 ```js
 
@@ -129,7 +130,7 @@ const U64_MAX = (BigInt(1) << BigInt(64)) - BigInt(1)
 
 ## 购买 SUPER 或其他 Token
 
-用户要持有积分才能购买SUPER
+用户要持有积分才能购买 SUPER
 
 ```js
 async (s) => {
@@ -271,9 +272,9 @@ async (s) => {
 };
 ```
 
-## 计算买入Token数量(非SUPER)
+## 计算买入 Token 数量(非 SUPER)
 
-- 全部源码: [calc.js](./calc.js)
+-   全部源码: [calc.js](./calc.js)
 
 ```js
 if (Ut.isNative) {
@@ -311,60 +312,64 @@ if (Ut.isNative) {
 //
 ```
 
-## 计算SUPER和积分
+## 计算 SUPER 和积分
 
 ```js
-function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
-    if (et < 100)
-        throw new Error("Invalid max threshold");
-    if ($ < 2)
-        throw new Error("Invalid max points");
-    let nt = []
-      , rt = MAX_TOKEN_SUPPLY - BigInt(_e)
-      , ot = compute_swap(rt, MAX_TOKEN_SUPPLY, !0) * BigInt(et) / BigInt(100)
-      , st = compute_swap(MAX_TOKEN_SUPPLY - BigInt(1), MAX_TOKEN_SUPPLY, !0);
-    ot > st && (ot = st),
-    ot < BigInt(tt) && (ot = BigInt(tt));
-    let lt = compute_buy_token_exact_in(ot, MAX_TOKEN_SUPPLY), ct = BigInt(0), dt = ceil_div(lt - ct, BigInt($ - 1)), pt;
+function curve_points(_e, $ = 1e3, et = 300, tt = BigInt(200) * BigInt(1e9)) {
+    if (et < 100) throw new Error("Invalid max threshold");
+    if ($ < 2) throw new Error("Invalid max points");
+    let nt = [],
+        rt = MAX_TOKEN_SUPPLY - BigInt(_e),
+        ot =
+            (compute_swap(rt, MAX_TOKEN_SUPPLY, !0) * BigInt(et)) / BigInt(100),
+        st = compute_swap(MAX_TOKEN_SUPPLY - BigInt(1), MAX_TOKEN_SUPPLY, !0);
+    ot > st && (ot = st), ot < BigInt(tt) && (ot = BigInt(tt));
+    let lt = compute_buy_token_exact_in(ot, MAX_TOKEN_SUPPLY),
+        ct = BigInt(0),
+        dt = ceil_div(lt - ct, BigInt($ - 1)),
+        pt;
     for (let mt = 0; mt < $; mt++) {
-        let yt = ct + dt * BigInt(mt)
-          , Et = BigInt(0);
+        let yt = ct + dt * BigInt(mt),
+            Et = BigInt(0);
         yt > BigInt(0) && (Et = compute_swap(yt, MAX_TOKEN_SUPPLY, !0));
         let _t = {
             buy_amount: yt,
             y: Et,
             current: !1,
-            market_cap: calculate_market_cap(calculate_price(MAX_TOKEN_SUPPLY - yt, Et, search_curve(MAX_TOKEN_SUPPLY - yt)))
+            market_cap: calculate_market_cap(
+                calculate_price(
+                    MAX_TOKEN_SUPPLY - yt,
+                    Et,
+                    search_curve(MAX_TOKEN_SUPPLY - yt)
+                )
+            ),
         };
-        nt.push(_t),
-        pt === void 0 && yt >= BigInt(rt) && (pt = Number(mt))
+        nt.push(_t), pt === void 0 && yt >= BigInt(rt) && (pt = Number(mt));
     }
     let ht = nt[pt];
-    if (ht.y == rt)
-        ht.current = !0;
+    if (ht.y == rt) ht.current = !0;
     else {
         let mt = compute_swap(rt, MAX_TOKEN_SUPPLY, !0);
-        ht.buy_amount = rt,
-        ht.y = mt,
-        ht.current = !0,
-        ht.market_cap = calculate_market_cap(calculate_price(BigInt(_e), mt, search_curve(BigInt(_e))))
+        (ht.buy_amount = rt),
+            (ht.y = mt),
+            (ht.current = !0),
+            (ht.market_cap = calculate_market_cap(
+                calculate_price(BigInt(_e), mt, search_curve(BigInt(_e)))
+            ));
     }
-    return nt
+    return nt;
 }
 ```
-
-
 
 ## 积分分配的算法
 
 > https://docs.super.exchange/supernomics/superchanics
 
-- 1积分可以购买 1 SUPER
-- 每5分钟分配一次
-  - 80% 给交易者
-  - 20% 给邀请者
+-   1 积分可以购买 1 SUPER
+-   每 5 分钟分配一次
 
-- 公式:
-![](./imgs/super-points-fomular.png)
+    -   80% 给交易者
+    -   20% 给邀请者
 
-
+-   公式:
+    ![](./imgs/super-points-fomular.png)
