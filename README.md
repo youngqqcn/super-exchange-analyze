@@ -309,7 +309,46 @@ if (Ut.isNative) {
     Nt(jn.toString()), St(Bn.toString()), kt(hn);
 }
 
-//
+
+// 按照SOL数量买入
+function compute_buy_token_exact_in(buySolAmount, currentTokenReserve) {
+    // x^n * y = k
+    // y 为 SOL数量
+    // x 为 token数量
+    let y = BigInt(0);
+    let tt = true;
+    let nt = BigInt(0);
+    for (let curve of CURVES) {
+        if (currentTokenReserve > curve.token_supply_at_boundary) {
+            if (tt) {
+                tt = false;
+                y = calculate_curve(currentTokenReserve, false, curve);
+            }
+            let it = curve.native_amount_at_boundary - y;
+            if (
+                buySolAmount < it ||
+                curve.k_with_multiplier_sol ==
+                    CURVE_LAST_PARAMS.k_with_multiplier_sol
+            ) {
+                // 二分法根
+                nt += find_root(currentTokenReserve, y, buySolAmount, curve);
+                break;
+            } else if (buySolAmount == it) {
+                nt += currentTokenReserve - curve.token_supply_at_boundary;
+                break;
+            } else {
+                // 跨区间
+
+                (nt += currentTokenReserve - curve.token_supply_at_boundary),
+                    (currentTokenReserve = curve.token_supply_at_boundary),
+                    (buySolAmount -= it),
+                    (y = curve.native_amount_at_boundary);
+            }
+        }
+    }
+    return nt;
+}
+
 ```
 
 ## 计算 SUPER 和积分
