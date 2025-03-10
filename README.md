@@ -275,6 +275,7 @@ async (s) => {
 ## 计算买入 Token 数量(非 SUPER)
 
 -   全部源码: [calc.js](./calc.js)
+    - 核心算法代码段：https://github.com/youngqqcn/super-exchange-analyze/blob/4c3834364eb20511254415baa188cb3a8421c4e5/calc.js#L83-L159
 
 ```js
 if (Ut.isNative) {
