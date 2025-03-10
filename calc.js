@@ -325,62 +325,70 @@ function compute_swap(_e, $, et) {
     return nt;
 }
 function calculate_market_cap(_e) {
-    return _e.mul(new Decimal(MAX_TOKEN_SUPPLY.toString()).div(new Decimal(1e6)))
+    return _e.mul(
+        new Decimal(MAX_TOKEN_SUPPLY.toString()).div(new Decimal(1e6))
+    );
 }
 
 function search_curve(_e) {
-    for (let $ of CURVES)
-        if (_e > $.token_supply_at_boundary)
-            return $;
-    return CURVE_LAST_PARAMS
+    for (let $ of CURVES) if (_e > $.token_supply_at_boundary) return $;
+    return CURVE_LAST_PARAMS;
 }
 function calculate_price(_e, $, et) {
-    let tt = new Decimal(_e.toString()).div(new Decimal(1e6))
-      , nt = new Decimal(($ + et.c_with_sol).toString()).div(new Decimal(LAMPORTS_PER_SOL$1))
-      , rt = Decimal.set({
-        precision: 15,
-        rounding: Decimal.ROUND_DOWN
-    });
-    return new rt(et.n).mul(nt).div(tt)
+    let tt = new Decimal(_e.toString()).div(new Decimal(1e6)),
+        nt = new Decimal(($ + et.c_with_sol).toString()).div(
+            new Decimal(LAMPORTS_PER_SOL$1)
+        ),
+        rt = Decimal.set({
+            precision: 15,
+            rounding: Decimal.ROUND_DOWN,
+        });
+    return new rt(et.n).mul(nt).div(tt);
 }
 
-
-function curve_points(_e, $=1e3, et=300, tt=BigInt(200) * BigInt(1e9)) {
-    if (et < 100)
-        throw new Error("Invalid max threshold");
-    if ($ < 2)
-        throw new Error("Invalid max points");
-    let nt = []
-      , rt = MAX_TOKEN_SUPPLY - BigInt(_e)
-      , ot = compute_swap(rt, MAX_TOKEN_SUPPLY, !0) * BigInt(et) / BigInt(100)
-      , st = compute_swap(MAX_TOKEN_SUPPLY - BigInt(1), MAX_TOKEN_SUPPLY, !0);
-    ot > st && (ot = st),
-    ot < BigInt(tt) && (ot = BigInt(tt));
-    let lt = compute_buy_token_exact_in(ot, MAX_TOKEN_SUPPLY), ct = BigInt(0), dt = ceil_div(lt - ct, BigInt($ - 1)), pt;
+function curve_points(_e, $ = 1e3, et = 300, tt = BigInt(200) * BigInt(1e9)) {
+    if (et < 100) throw new Error("Invalid max threshold");
+    if ($ < 2) throw new Error("Invalid max points");
+    let nt = [],
+        rt = MAX_TOKEN_SUPPLY - BigInt(_e),
+        ot =
+            (compute_swap(rt, MAX_TOKEN_SUPPLY, !0) * BigInt(et)) / BigInt(100),
+        st = compute_swap(MAX_TOKEN_SUPPLY - BigInt(1), MAX_TOKEN_SUPPLY, !0);
+    ot > st && (ot = st), ot < BigInt(tt) && (ot = BigInt(tt));
+    let lt = compute_buy_token_exact_in(ot, MAX_TOKEN_SUPPLY),
+        ct = BigInt(0),
+        dt = ceil_div(lt - ct, BigInt($ - 1)),
+        pt;
     for (let mt = 0; mt < $; mt++) {
-        let yt = ct + dt * BigInt(mt)
-          , Et = BigInt(0);
+        let yt = ct + dt * BigInt(mt),
+            Et = BigInt(0);
         yt > BigInt(0) && (Et = compute_swap(yt, MAX_TOKEN_SUPPLY, !0));
         let _t = {
             buy_amount: yt,
             y: Et,
             current: !1,
-            market_cap: calculate_market_cap(calculate_price(MAX_TOKEN_SUPPLY - yt, Et, search_curve(MAX_TOKEN_SUPPLY - yt)))
+            market_cap: calculate_market_cap(
+                calculate_price(
+                    MAX_TOKEN_SUPPLY - yt,
+                    Et,
+                    search_curve(MAX_TOKEN_SUPPLY - yt)
+                )
+            ),
         };
-        nt.push(_t),
-        pt === void 0 && yt >= BigInt(rt) && (pt = Number(mt))
+        nt.push(_t), pt === void 0 && yt >= BigInt(rt) && (pt = Number(mt));
     }
     let ht = nt[pt];
-    if (ht.y == rt)
-        ht.current = !0;
+    if (ht.y == rt) ht.current = !0;
     else {
         let mt = compute_swap(rt, MAX_TOKEN_SUPPLY, !0);
-        ht.buy_amount = rt,
-        ht.y = mt,
-        ht.current = !0,
-        ht.market_cap = calculate_market_cap(calculate_price(BigInt(_e), mt, search_curve(BigInt(_e))))
+        (ht.buy_amount = rt),
+            (ht.y = mt),
+            (ht.current = !0),
+            (ht.market_cap = calculate_market_cap(
+                calculate_price(BigInt(_e), mt, search_curve(BigInt(_e)))
+            ));
     }
-    return nt
+    return nt;
 }
 
 /**
@@ -456,26 +464,41 @@ function buyToken(amount, isBuyBySOL, currentTokenReserve) {
     // console.log(pow(BigInt(2), BigInt(10), true));
     // console.log(buyToken("1", true, MAX_TOKEN_SUPPLY));
 
-    console.log(buyToken("3.642026972", true, MAX_TOKEN_SUPPLY));       //  50,000,000
+    // console.log(buyToken("3.642026972", true, MAX_TOKEN_SUPPLY));       //  50,000,000
     // console.log(buyToken("16.065526973", true, MAX_TOKEN_SUPPLY));      // 100,000,000
     // console.log(buyToken("83.261338321", true, MAX_TOKEN_SUPPLY));      // 200,000,000
     // console.log(buyToken("56239.830149844", true, MAX_TOKEN_SUPPLY));   // 800,000,000
     // console.log(buyToken("582423.209549844", true, MAX_TOKEN_SUPPLY));  // 900,000,000
     // console.log(buyToken("3288509.160749844", true, MAX_TOKEN_SUPPLY)); // 950,000,000
 
-    // let i = 0.875;
-    // while (i <= 500000) {
-    //     i += 10;
-    //     let ret = buyToken(i.toString(), true, MAX_TOKEN_SUPPLY);
-    //     console.log(`${i.toFixed(9).toString()},${ret.tokenAmount/1e9}`);
-    // }
+    console.log("x,y");
+    let i = 0.1;
+
+    let percent = 1; // 1%
+    while (i <= 3288509) {
+        if (i < 83) {
+            i += 0.1;
+        } else {
+            i += 1;
+        }
+        let ret = buyToken(i.toString(), true, MAX_TOKEN_SUPPLY);
+
+        if (Math.floor(Number(ret.tokenAmount) / 10_000_000) == percent) {
+            console.log(
+                `${i.toFixed(2).toString()},${Number(ret.tokenAmount)
+                    .toFixed(0)
+                    .toString()}`
+            );
+            percent += 1;
+        }
+        // console.log(`${i.toFixed(2).toString()},${Number(ret.tokenAmount).toFixed(0).toString()}`);
+    }
 
     // while (i <= 582423) {
     //     i += 10;
     //     let ret = buyToken(i.toString(), true, MAX_TOKEN_SUPPLY);
     //     console.log(`${i.toFixed(9).toString()},${ret.tokenAmount}`);
     // }
-
 
     // console.log(buyToken("3927720.043250156", true, MAX_TOKEN_SUPPLY)); // 999,999,999
 
