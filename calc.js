@@ -79,7 +79,7 @@ const U64_MAX = (BigInt(1) << BigInt(64)) - BigInt(1),
         CURVE_7_PARAMS,
     ];
 
-// 按照
+// 按照SOL数量计算token数量
 function compute_buy_token_exact_in(buySolAmount, currentTokenReserve) {
     // x^n * y = k
     // y 为 SOL数量
@@ -118,7 +118,8 @@ function compute_buy_token_exact_in(buySolAmount, currentTokenReserve) {
 }
 
 // 二分法求根
-// 问题: 在区间内是线性方程，为什么要用二分法求解而不是直接用表达式？
+// 问题: 为什么要用二分法求解而不是直接用表达式？
+// 答： x^n * y = k 每条曲线的k不同，
 function find_root(currentTokenReserve, y, buySolAmount, curve) {
     let nt = y + buySolAmount;
 

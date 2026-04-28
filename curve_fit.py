@@ -43,5 +43,8 @@ plt.ylabel("y")
 plt.legend()
 plt.grid(True)
 
-# 显示图像
+
+
+
+# show the plot
 plt.show()
